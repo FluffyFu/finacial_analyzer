@@ -1,7 +1,7 @@
 """
 File_name: credit_card.py
 Time: 01/03/2020
-Auther: Xinlin Song
+Author: Fluffy Fu
 Description: Base Class for managing data from a credit card statement.
 """
 
