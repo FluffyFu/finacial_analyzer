@@ -9,7 +9,7 @@ class CreditCard:
     """
     Base class for handling credit card statement from different banks.
     """
-    def __init__(self, file_path, file_name_regex):
+    def __init__(self, file_path, file_name_regex=None):
         self._file_path = file_path
         self._file_name_regex = file_name_regex
         self._statement = self._load_statements()
@@ -22,6 +22,9 @@ class CreditCard:
 
     @property
     def statement(self):
+        """
+        Returns the read statements a pandas dataframe.
+        """
         return self._statement
 
     @property
@@ -32,6 +35,7 @@ class CreditCard:
         tuple of datetime.date.
         """
         pass
+
 
     @property
     def spending_categories(self):
