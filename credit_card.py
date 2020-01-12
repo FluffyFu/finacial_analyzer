@@ -9,16 +9,30 @@ class CreditCard:
     """
     Base class for handling credit card statement from different banks.
     """
-    def __init__(self, file_path, file_name_regex=None):
+    def __init__(self, file_path, file_name_regex):
         self._file_path = file_path
         self._file_name_regex = file_name_regex
         self._statement = self._load_statements()
+        self._time_range = self._get_time_range()
+        self._spending_categories = self._get_spending_categories()
 
     def _load_statements(self):
         """
         Load statemet(s) with given file_name_regex in the given file path.
         """
-        pass
+        raise NotImplementedError
+
+    def _get_time_range(self):
+        """
+        Private method to retrieve the time range of the statements.
+        """
+        raise NotImplementedError
+
+    def _get_spending_categories(self):
+        """
+        Private method to retrieve the spending categories in the statements.
+        """
+        raise NotImplementedError
 
     @property
     def statement(self):
@@ -34,8 +48,7 @@ class CreditCard:
 
         tuple of datetime.date.
         """
-        pass
-
+        return self._time_range
 
     @property
     def spending_categories(self):
@@ -44,4 +57,23 @@ class CreditCard:
 
         a list of string.
         """
-        pass
+        return self._spending_categories
+
+    def date_filter(self, start=None, end=None):
+        """
+        Filter the statement based on the given time.
+
+        Args:
+            start (datetime.datetime): transaction date >= start will be kept.
+            If None, no filter will be applied. Default = None.
+
+            end (datetime.datetime): transaction date <= end will be kept.
+            If None, no filter will be applied. Default = None.
+        """
+        result = self._statement
+        if start:
+            result = result[self._statement[self.date_col] >= start]
+        if end:
+            result = result[self._statement[self.date_col] <= end]
+
+        return result
