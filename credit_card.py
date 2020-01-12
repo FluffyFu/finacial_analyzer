@@ -5,6 +5,11 @@ Author: Fluffy Fu
 Description: Base Class for managing data from a credit card statement.
 """
 
+from os import listdir
+from os.path import isfile, join
+import pandas as pd
+import numpy as np
+
 class CreditCard:
     """
     Base class for handling credit card statement from different banks.
@@ -20,19 +25,49 @@ class CreditCard:
         """
         Load statemet(s) with given file_name_regex in the given file path.
         """
-        raise NotImplementedError
+        file_names = self._get_file_names()
+
+        if file_names:
+            print('loading the following statements:')
+            for f in file_names:
+                print(f)
+        else:
+            raise Exception('No statement in directory: {}'.format(self._file_path))
+
+        df = pd.concat([pd.read_csv(file_name) for file_name in file_names])
+        return self._data_cleaning(df)
 
     def _get_time_range(self):
         """
         Private method to retrieve the time range of the statements.
         """
-        raise NotImplementedError
+        min_date = self._statement[self.date_col].min()
+        max_date = self._statement[self.date_col].max()
+        return (min_date, max_date)
 
     def _get_spending_categories(self):
         """
         Private method to retrieve the spending categories in the statements.
+        Return purchase categories in sorted order.
         """
-        raise NotImplementedError
+        raw_cats = self._statement[self.category_col].unique().tolist()
+        raw_cats.remove(np.nan)
+        return sorted(raw_cats)
+
+    def _get_file_names(self):
+        """
+        return a list of file names from the given file_path that matches the regex.
+        """
+        # TODO check the file type and handle possible file types (csv, xls)
+        if self._file_name_regex:
+            # TODO implement code to read files that match the given regex.
+            # should get a list of matched file names.
+            pass
+        else:
+            # When the regex is not given, read all the files in the directory.
+            file_names = [join(self._file_path, f) for
+                          f in listdir(self._file_path) if f.endswith(('.csv', '.CSV'))]
+        return file_names
 
     @property
     def statement(self):

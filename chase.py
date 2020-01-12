@@ -8,7 +8,6 @@ from os import listdir
 from os.path import isfile, join
 from datetime import datetime
 import pandas as pd
-import numpy as np
 from financial.credit_card import CreditCard
 
 
@@ -20,7 +19,7 @@ class Chase(CreditCard):
     category_col = 'Category'
     type_col = 'Type'
     desc_col = 'Description'
-    amoutn_col = 'Amount'
+    amount_col = 'Amount'
 
     date_format_str = '%m/%d/%Y'
 
@@ -29,54 +28,12 @@ class Chase(CreditCard):
         # this is will be generalized in the future.
         super(Chase, self).__init__(file_path, file_name_regex)
 
-    def _load_statements(self):
-        """
-        load statements from csv files.
-        """
-        file_names = self._get_file_names()
-
-        if file_names:
-            print('loading the following statements:')
-            for f in file_names:
-                print(f)
-        else:
-            raise Exception('No statement in directory: {}'.format(self._file_path))
-
-        df = pd.concat([pd.read_csv(file_name) for file_name in file_names])
-        return self._data_cleaning(df)
-
-    def _get_file_names(self):
-        """
-        return a list of file names from the given file_path that matches the regex.
-        """
-        # TODO check the file type and handle possible file types (csv, xls)
-        if self._file_name_regex:
-            # TODO implement code to read files that match the given regex.
-            # should get a list of matched file names.
-            pass
-        else:
-            # When the regex is not given, read all the files in the directory.
-            file_names = [join(self._file_path, f) for f in listdir(self._file_path) if f.endswith(('.csv', '.CSV'))]
-
-        return file_names
-
-    def _get_time_range(self):
-        min_date = self._statement[self.date_col].min()
-        max_date = self._statement[self.date_col].max()
-        return (min_date, max_date)
-
-    def _get_spending_categories(self):
-        """
-        Return purchase categories in sorted order.
-        """
-        raw_cats = self._statement[self.category_col].unique().tolist()
-        raw_cats.remove(np.nan)
-        return sorted(raw_cats)
-
     def _data_cleaning(self, df):
         """
         Cleaning the data. Currently, it does the following:
-            1. convert dates from string to datetime.
+            1. convert dates from string to datetime object.
+
+            2. make spending positive and payment negative.
 
         Args:
             df(pd.DataFrame): dataframe needs to be cleaned.
@@ -88,4 +45,6 @@ class Chase(CreditCard):
         df[self.date_col] = pd.to_datetime(
             df[self.date_col],
             format=self.date_format_str)
+
+        df[self.amount_col] = -df[self.amount_col]
         return  df
