@@ -23,10 +23,10 @@ class Chase(CreditCard):
 
     date_format_str = '%m/%d/%Y'
 
-    def __init__(self, file_path, file_name_regex=None):
+    def __init__(self, file_path, file_suffix=None):
         # TODO currently, file_path is assumed to be an absolute one.
         # this is will be generalized in the future.
-        super(Chase, self).__init__(file_path, file_name_regex)
+        super(Chase, self).__init__(file_path, file_suffix)
 
     def _data_cleaning(self, df):
         """

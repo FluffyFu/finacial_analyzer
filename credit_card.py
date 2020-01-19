@@ -9,21 +9,26 @@ from os import listdir
 from os.path import isfile, join
 import pandas as pd
 import numpy as np
+from financial.file_suffix import FileSuffix
 
 class CreditCard:
     """
     Base class for handling credit card statement from different banks.
     """
-    def __init__(self, file_path, file_name_regex):
+    def __init__(self, file_path, file_suffix):
+        """
+        file_path(str): path to the data.
+        file_suffix(FileSuffix): type of file suffix of interest.
+        """
         self._file_path = file_path
-        self._file_name_regex = file_name_regex
+        self._file_suffix = file_suffix
         self._statement = self._load_statements()
         self._time_range = self._get_time_range()
         self._spending_categories = self._get_spending_categories()
 
     def _load_statements(self):
         """
-        Load statemet(s) with given file_name_regex in the given file path.
+        Load statement(s) with given file_suffix in the given file path.
         """
         file_names = self._get_file_names()
 
@@ -58,16 +63,16 @@ class CreditCard:
         """
         return a list of file names from the given file_path that matches the regex.
         """
-        # TODO check the file type and handle possible file types (csv, xls)
-        if self._file_name_regex:
-            # TODO implement code to read files that match the given regex.
-            # should get a list of matched file names.
-            pass
+
+        file_names = [join(self._file_path, f) for f in listdir(self._file_path)]
+        if self._file_suffix == FileSuffix.CSV:
+            suffix = (FileSuffix.CSV.value, FileSuffix.CSV.value.upper())
+        elif self._file_suffix == FileSuffix.XLSX:
+            suffix = (FileSuffix.XLSX.value, FileSuffix.CSV.value.upper())
         else:
-            # When the regex is not given, read all the files in the directory.
-            file_names = [join(self._file_path, f) for
-                          f in listdir(self._file_path) if f.endswith(('.csv', '.CSV'))]
-        return file_names
+            raise Exception("Invalid file_suffix: {}".format(self._file_suffix))
+        filter_file_names = [f for f in file_names if f.endswith(suffix)]
+        return filter_file_names
 
     @property
     def statement(self):

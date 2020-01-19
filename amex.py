@@ -20,8 +20,8 @@ class Amex(CreditCard):
 
     date_format_str = '%m/%d/%y'
 
-    def __init__(self, file_path, file_name_regex=None):
-        super(Amex, self).__init__(file_path, file_name_regex)
+    def __init__(self, file_path, file_suffix=None):
+        super(Amex, self).__init__(file_path, file_suffix)
 
     def _data_cleaning(self, df):
         """
