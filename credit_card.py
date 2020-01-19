@@ -62,7 +62,6 @@ class CreditCard:
         Return purchase categories in sorted order.
         """
         raw_cats = self._statement[self.category_col].unique().tolist()
-        raw_cats.remove(np.nan)
         return sorted(raw_cats)
 
     def _get_file_names(self):

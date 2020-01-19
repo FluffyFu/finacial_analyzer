@@ -52,6 +52,7 @@ class Chase(CreditCard):
         df = self._col_name_cleaning(df)
         df = self._drop_irrelavent_cols(df)
         df = self._map_to_general_categories(df)
+        df['Bank'] = 'Chase'
 
         return  df
 
@@ -108,7 +109,6 @@ class Chase(CreditCard):
         Payment has NaN category. Map them to 'Payment'.
         """
         # payment has NaN category.
-        df[self.category_col] = df[self.category_col].fillna('Payment')
-
         df[self.category_col] = df[self.category_col].map(self.cat_map)
+        df[self.category_col] = df[self.category_col].fillna('Payment')
         return df

@@ -46,6 +46,8 @@ class Amex(CreditCard):
         df = self._date_cleaning(df)
         df = self._drop_irrelavent_cols(df)
         df = self._spending_type_cleaning(df)
+        df = self._map_to_general_categories(df)
+        df['Bank'] = 'Amex'
 
         return df
 
@@ -86,7 +88,7 @@ class Amex(CreditCard):
         Map Amex specific spending categories to general categories.
         Payment has NaN category. Map them to 'Payment'.
         """
-        df[df.category_col] = df[df.category_col].fillna('Payment')
-        df[df.category_col] = df[df.category_col].map(self.cat_map)
+        df[self.category_col] = df[self.category_col].map(self.cat_map)
+        df[self.category_col] = df[self.category_col].fillna('Payment')
 
         return df
