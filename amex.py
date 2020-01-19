@@ -13,8 +13,19 @@ class Amex(CreditCard):
     Class used to handle statements from Amex.
     """
     original_date_col = 'Date'
-
     date_format_str = '%m/%d/%y'
+
+    cat_map = {
+        'Merchandise & Supplies-Groceries': 'Groceries',
+        'Merchandise & Supplies-Clothing Stores': 'Shopping',
+        'Transportation-Fuel': 'Travel',
+        'Restaurant-Bar & Café': 'Food',
+        'Merchandise & Supplies-Internet Purchase': 'Others',
+        'Entertainment-General Attractions': 'Food',
+        'Restaurant-Restauran': 'Food',
+        'Merchandise & Supplies-Arts & Jewelry': 'Others',
+        'Merchandise & Supplies-Department Store': 'Others',
+    }
 
     def __init__(self, file_path, file_suffix=None):
         super(Amex, self).__init__(file_path, file_suffix)
@@ -67,5 +78,15 @@ class Amex(CreditCard):
         to align with that in Chase statements.
         """
         df[self.type_col] = df[self.type_col].map({'DEBIT':'Sale', 'CREDIT': 'Payment'})
+
+        return df
+
+    def _map_to_general_categories(self, df):
+        """
+        Map Amex specific spending categories to general categories.
+        Payment has NaN category. Map them to 'Payment'.
+        """
+        df[df.category_col] = df[df.category_col].fillna('Payment')
+        df[df.category_col] = df[df.category_col].map(self.cat_map)
 
         return df

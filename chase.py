@@ -4,9 +4,6 @@ Author: Fluffy Fu
 Date: 01/08/2020
 Description: Implement child class of CreditCard that handles credit statements from Chase bank.
 """
-from os import listdir
-from os.path import isfile, join
-from datetime import datetime
 import pandas as pd
 from financial.credit_card import CreditCard
 
@@ -17,6 +14,15 @@ class Chase(CreditCard):
     """
     original_date_col = 'Transaction Date'
     date_format_str = '%m/%d/%Y'
+
+    cat_map = {
+        'Food & Drink': 'Food',
+        'Bills & Utilities': 'Bill',
+        'Personal': 'Others',
+        'Travel': 'Travel',
+        'Shopping': 'Shopping',
+        'Groceries': 'Groceries',
+    }
 
     def __init__(self, file_path, file_suffix=None):
         # TODO currently, file_path is assumed to be an absolute one.
@@ -45,6 +51,7 @@ class Chase(CreditCard):
         df = self._amount_cleaning(df)
         df = self._col_name_cleaning(df)
         df = self._drop_irrelavent_cols(df)
+        df = self._map_to_general_categories(df)
 
         return  df
 
@@ -94,3 +101,14 @@ class Chase(CreditCard):
         cols_to_drop = [col for col in df.columns if col not in cols_of_interest]
 
         return df.drop(columns=cols_to_drop)
+
+    def _map_to_general_categories(self, df):
+        """
+        Map Chase specific spending categories to general categories.
+        Payment has NaN category. Map them to 'Payment'.
+        """
+        # payment has NaN category.
+        df[self.category_col] = df[self.category_col].fillna('Payment')
+
+        df[self.category_col] = df[self.category_col].map(self.cat_map)
+        return df
