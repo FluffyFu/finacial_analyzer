@@ -15,12 +15,7 @@ class Chase(CreditCard):
     """
     Class to read statements from Chase and pull out stats from them.
     """
-    date_col = 'Transaction Date'
-    category_col = 'Category'
-    type_col = 'Type'
-    desc_col = 'Description'
-    amount_col = 'Amount'
-
+    original_date_col = 'Transaction Date'
     date_format_str = '%m/%d/%Y'
 
     def __init__(self, file_path, file_suffix=None):
@@ -31,9 +26,13 @@ class Chase(CreditCard):
     def _data_cleaning(self, df):
         """
         Cleaning the data. Currently, it does the following:
-            1. convert dates from string to datetime object.
+            1. Convert dates from string to datetime object.
 
-            2. make spending positive and payment negative.
+            2. Make spending positive and payment negative.
+
+            3. Replace the space in column name to '_'
+
+            4. Keep columns of interest.
 
         Args:
             df(pd.DataFrame): dataframe needs to be cleaned.
@@ -42,9 +41,56 @@ class Chase(CreditCard):
         Returns:
             pd.DataFrame, cleaned dataframe.
         """
-        df[self.date_col] = pd.to_datetime(
-            df[self.date_col],
+        df = self._date_cleaning(df)
+        df = self._amount_cleaning(df)
+        df = self._col_name_cleaning(df)
+        df = self._drop_irrelavent_cols(df)
+
+        return  df
+
+    def _date_cleaning(self, df):
+        """
+        Convert dates from string to datetime object.
+
+        df (pandas.DataFrame): dataframe need to be cleaned.
+        """
+        df[self.original_date_col] = pd.to_datetime(
+            df[self.original_date_col],
             format=self.date_format_str)
 
+        return df
+
+    def _amount_cleaning(self, df):
+        """
+        Make spending positive and payment negative.
+
+        df (pandas.DataFrame): dataframe need to be cleaned.
+        """
         df[self.amount_col] = -df[self.amount_col]
-        return  df
+
+        return df
+
+    def _col_name_cleaning(self, df):
+        """
+        Replace the space in column name to '_'.
+
+        df (pandas.DataFrame): dataframe need to be cleaned.
+        """
+        old_cols = df.columns
+        new_cols = [col.replace(' ', '_') for col in old_cols]
+
+        col_map = {old: new for old, new in zip(old_cols, new_cols)}
+        df_new = df.rename(columns=col_map)
+
+        return df_new
+
+    def _drop_irrelavent_cols(self, df):
+        """
+        remove columns that does not appear in class columns.
+
+        """
+        cols_of_interest = {self.date_col, self.category_col, self.type_col,
+                            self.desc_col, self.amount_col}
+        cols_to_drop = [col for col in df.columns if col not in cols_of_interest]
+
+        return df.drop(columns=cols_to_drop)

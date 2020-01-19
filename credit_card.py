@@ -15,6 +15,12 @@ class CreditCard:
     """
     Base class for handling credit card statement from different banks.
     """
+    date_col = 'Transaction_Date'
+    category_col = 'Category'
+    type_col = 'Type'
+    desc_col = 'Description'
+    amount_col = 'Amount'
+
     def __init__(self, file_path, file_suffix):
         """
         file_path(str): path to the data.
