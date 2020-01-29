@@ -36,7 +36,7 @@ class Report:
         """
         Return combined statement from Chase and Amex.
         """
-        if self._statement:
+        if self._statement is not None:
             return self._statement
         self._statement = pd.concat(
             [self._chase.statement, self._amex.statement],
@@ -54,7 +54,7 @@ class Report:
             end(int): end point of the time window. Format yyyymmdd.
         """
 
-        filtered = window_filter(self._statement, self.date_col, start, end)
+        filtered = window_filter(self.statement, self.date_col, start, end)
         result = filtered.groupby(self.category_col).agg('sum').reset_index()
         return result
 
@@ -69,7 +69,7 @@ class Report:
 
             end(int): end point of the time window. Format yyyymmdd.
         """
-        filtered = window_filter(self._statement, self.date_col, start, end)
+        filtered = window_filter(self.statement, self.date_col, start, end)
         filtered = filtered[filtered[self.category_col]==category]
 
         return filtered
