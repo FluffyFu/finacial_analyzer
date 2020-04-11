@@ -23,13 +23,23 @@ class Report:
     type_col = 'Type'
     desc_col = 'Description'
     amount_col = 'Amount'
+    holder_col = 'Holder'
 
-    def __init__(self, chase_path, chase_file_suffix,
-                 amex_path, amex_file_suffix
+    def __init__(self, chase_path=None, chase_file_suffix=None,
+                 amex_path=None, amex_file_suffix=None, holder=None, reports=None
                  ):
-        self._chase = Chase(chase_path, chase_file_suffix)
-        self._amex = Amex(amex_path, amex_file_suffix)
-        self._statement = None
+        if reports == None:
+            # construct the object from raw data
+            self._chase = Chase(chase_path, chase_file_suffix)
+            if amex_path != None:
+                self._amex = Amex(amex_path, amex_file_suffix)
+            else:
+                self._amex = None
+            self._holder = holder
+            self._statement = None
+        else:
+            # combine a few Report objects to form a single one.
+            self._statement = pd.concat([report.statement for report in reports])
 
     @property
     def statement(self):
@@ -38,11 +48,17 @@ class Report:
         """
         if self._statement is not None:
             return self._statement
-        self._statement = pd.concat(
-            [self._chase.statement, self._amex.statement],
-            ignore_index=True,
-            join='inner',
-        )
+
+        if self._amex is not None:
+            self._statement = pd.concat(
+                [self._chase.statement, self._amex.statement],
+                ignore_index=True,
+                join='inner',
+            )
+        else:
+            self._statement = self._chase.statement
+        # add holder name column
+        self._statement[self.holder_col] = self._holder
         return self._statement
 
     def summary(self, start, end):
@@ -55,7 +71,7 @@ class Report:
         """
 
         filtered = window_filter(self.statement, self.date_col, start, end)
-        result = filtered.groupby(self.category_col).agg('sum').reset_index()
+        result = filtered.groupby([self.category_col, self.holder_col]).agg('sum').reset_index()
         return result
 
     def category_trans(self, category, start, end):

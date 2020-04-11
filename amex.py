@@ -6,6 +6,7 @@ Description: Implement child class of CreditCard that handles credit statements
 from American Express.
 """
 import pandas as pd
+import numpy as np
 from financial.credit_card import CreditCard
 
 class Amex(CreditCard):
@@ -44,8 +45,8 @@ class Amex(CreditCard):
             Chase statements.
         """
         df = self._date_cleaning(df)
-        df = self._drop_irrelavent_cols(df)
         df = self._spending_type_cleaning(df)
+        df = self._drop_irrelavent_cols(df)
         df = self._map_to_general_categories(df)
         df['Bank'] = 'Amex'
 
@@ -76,10 +77,9 @@ class Amex(CreditCard):
 
     def _spending_type_cleaning(self, df):
         """
-        convert 'DEBIT' to 'Sale' and 'CREDIT' to 'Payment' in Type column
-        to align with that in Chase statements.
+        First add Type column, then fill the column with 'Sale' and 'Payment'.
         """
-        df[self.type_col] = df[self.type_col].map({'DEBIT':'Sale', 'CREDIT': 'Payment'})
+        df[self.type_col] = np.where(df[self.amount_col] > 0, 'Sale', 'Payment')
 
         return df
 

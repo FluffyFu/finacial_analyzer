@@ -7,7 +7,6 @@ Description: Implement child class of CreditCard that handles credit statements 
 import pandas as pd
 from financial.credit_card import CreditCard
 
-
 class Chase(CreditCard):
     """
     Class to read statements from Chase and pull out stats from them.
