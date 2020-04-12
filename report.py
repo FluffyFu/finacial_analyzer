@@ -86,6 +86,19 @@ class Report:
             end(int): end point of the time window. Format yyyymmdd.
         """
         filtered = window_filter(self.statement, self.date_col, start, end)
-        filtered = filtered[filtered[self.category_col]==category]
+        filtered = filtered[filtered[self.category_col]==category].sort_values(
+            by=self.amount_col, ascending=False
+        )
 
         return filtered
+
+    def spending_by_month(self):
+        """
+        Group the statement by month and holder.
+        """
+        statement = self._statement[self._statement[self.type_col]=='Sale']
+        statement['Year'] = statement[self.date_col].dt.year
+        statement['Month'] = statement[self.date_col].dt.month
+
+        result = statement.groupby(['Year', 'Month', 'Holder'])[self.amount_col].agg('sum').reset_index()
+        return result
