@@ -1,1 +1,1 @@
-Code for summarizing spendings from different credit cards.
+Code for pulling spendings from different credit cards.
